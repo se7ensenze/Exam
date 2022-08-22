@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 
 namespace Example.Domain.Buyers
 {
@@ -11,9 +6,9 @@ namespace Example.Domain.Buyers
     public class Buyer
         :IHasDomainEvent
     {
-        public Guid Id { get; private set; }
+        public Guid Id { get; }
 
-        public Listing Listing { get; private set; }    
+        public Listing Listing { get; }    
 
         public Offer? Offer { get; private set; }
 
@@ -21,14 +16,7 @@ namespace Example.Domain.Buyers
 
         private readonly List<DomainEvent> _domainEvents;
 
-        public Buyer(Guid id, Listing listing)
-        {
-            Id = id;
-            Listing = listing;
-            _domainEvents = new List<DomainEvent>();
-        }
-
-        public Buyer(Guid id, Listing listing, Offer offer)
+        public Buyer(Guid id, Listing listing, Offer? offer)
         {
             Id = id;
             Listing = listing;
@@ -39,6 +27,11 @@ namespace Example.Domain.Buyers
 
         public void CreatOffer(decimal price)
         {
+            if (Offer != null)
+            {
+                throw new InvalideOperationException("Offer is already created");
+            }
+
             Offer = new Offer(Listing.AssetId, price);
 
             _domainEvents.Add(new OfferCreatedEventArgs(this));
@@ -51,7 +44,7 @@ namespace Example.Domain.Buyers
                 throw new InvalideOperationException("No Offer were created");
             }
 
-            Offer.BidOrder.Cancel();
+            Offer.Cancel();
 
             _domainEvents.Add(new OfferCancelledEventArgs(this));
         }

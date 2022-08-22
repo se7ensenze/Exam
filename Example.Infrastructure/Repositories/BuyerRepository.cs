@@ -21,10 +21,38 @@ namespace Example.Infrastructure.Repositories
                 .Listings
                 .FirstAsync(l => l.ListingId == listingId);
 
-            var buyer = new Buyer(id: userId,
+            var loadedOffer = await _dbContext
+                .Offers
+                .Join(_dbContext.Orders,
+                    (o) => o.OrderId,
+                    (o => o.OrderId),
+                    (of, or) => new
+                    {
+                        of.OfferId,
+                        of.UserId,
+                        of.ListingId,
+                        of.OrderId,
+                        or.Price,
+                        or.AssetId,
+                        or.Status
+                    })
+                .FirstOrDefaultAsync(o => 
+                    o.UserId == userId && o.ListingId == listingId);
+
+            var buyer = new Buyer(
+                id: userId,
                 listing: new Domain.Buyers.Listing(
-                    id: listing.ListingId, 
-                    assetId: listing.AssetId));
+                    id: listing.ListingId,
+                    assetId: listing.AssetId),
+                offer: (loadedOffer == null
+                    ? null
+                    : new Domain.Buyers.Offer(
+                        id: loadedOffer.OfferId,
+                        orderId: loadedOffer.OrderId,
+                        assetId: loadedOffer.AssetId,
+                        price: loadedOffer.Price,
+                        status: OrderStatus.FromName(loadedOffer.Status))));
+                        
 
             return buyer;
         }

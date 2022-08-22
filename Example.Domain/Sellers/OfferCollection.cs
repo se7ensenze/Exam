@@ -16,11 +16,7 @@ namespace Example.Domain.Sellers
         public OfferCollection(IEnumerable<Offer> offers)
         {
             _offerList = new List<Offer>();
-
-            if (offers != null && offers.Any())
-            {
-                _offerList.AddRange(offers);
-            }
+            _offerList.AddRange(offers);
         }
 
         public ReadOnlyCollection<Offer> AsReadOnly => _offerList.AsReadOnly();

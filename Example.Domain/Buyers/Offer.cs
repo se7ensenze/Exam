@@ -24,6 +24,11 @@ namespace Example.Domain.Buyers
                 status: status);
         }
 
+        public void Cancel()
+        {
+            BidOrder.Cancel();
+        }
+
         public Guid Id { get; private set; }
         public Order BidOrder { get; set; }
     }
